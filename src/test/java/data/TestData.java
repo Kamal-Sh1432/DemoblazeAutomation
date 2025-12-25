@@ -5,7 +5,7 @@ import org.testng.annotations.DataProvider;
 public class TestData {
 
     @DataProvider(name = "purchaseData")
-    public static Object[][] purchaseData() {
+    public static Object[][] getPurchaseData() {
 
         return new Object[][]{
 

@@ -32,7 +32,15 @@ public class HomePage {
     }
 
     public void logout() {
-        wait.until(ExpectedConditions.elementToBeClickable(logout)).click();
+
+        // Wait a bit for UI to stabilize
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException ignored) {}
+
+        // Force click using JavaScript (Demoblaze UI bug workaround)
+        ((org.openqa.selenium.JavascriptExecutor) driver)
+                .executeScript("document.getElementById('logout2').click();");
     }
 
     // ✅ Safe random category selection

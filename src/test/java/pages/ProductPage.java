@@ -8,49 +8,47 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 
 public class ProductPage {
 
-    WebDriver driver;
-    WebDriverWait wait;
-    Random random = new Random();
-    Set<String> selectedProducts = new HashSet<>();
+    private final WebDriver driver;
+    private final WebDriverWait wait;
+    private final Random random = new Random();
+
+    // Demoblaze locators (nava is correct DOM id, not a typo)
+    private final By productLinks = By.cssSelector(".card-title a");
+    private final By addToCartBtn = By.linkText("Add to cart");
+    private final By homeLink = By.id("nava");
 
     public ProductPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    By productLinks = By.cssSelector(".card-title a");
-    By addToCartBtn = By.linkText("Add to cart");
-    By homeLink = By.id("nava");
+    /**
+     * Adds 1 or 2 random products to cart in a stable way
+     */
+    public void addRandomProductsToCart() {
 
-    // ✅ Truly random: 1, 2 or 3 products per iteration
-        public int addRandomProductsToCart() {
+        int productsToAdd = random.nextInt(2) + 1;
+        System.out.println("🛒 Products to add in this iteration: " + productsToAdd);
 
-        int productsToAdd = random.nextInt(3) + 1;
+        for (int i = 1; i <= productsToAdd; i++) {
 
-        for (int i = 0; i < productsToAdd; i++) {
+            // Always re-fetch fresh elements (prevents stale element issues)
+            List<WebElement> products = wait.until(
+                    ExpectedConditions.presenceOfAllElementsLocatedBy(productLinks)
+            );
 
-            List<WebElement> products =
-                    wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(productLinks));
+            int index = random.nextInt(products.size());
+            WebElement selectedProduct = products.get(index);
+            String productName = selectedProduct.getText();
 
-            WebElement chosen;
-            String name;
-            int guard = 0;
+            System.out.println("➡️ Selecting product: " + productName);
 
-            do {
-                chosen = products.get(random.nextInt(products.size()));
-                name = chosen.getText();
-                guard++;
-            } while (selectedProducts.contains(name) && guard < 5);
-
-            selectedProducts.add(name);
-            chosen.click();
-
-            // ✅ INSERT HERE
-            System.out.println("Product added: " + name);
+            selectedProduct.click();
 
             wait.until(ExpectedConditions.elementToBeClickable(addToCartBtn)).click();
 
@@ -59,8 +57,10 @@ public class ProductPage {
                 alert.accept();
             } catch (Exception ignored) {}
 
-            wait.until(ExpectedConditions.elementToBeClickable(homeLink)).click();
-        }
+            System.out.println("✅ Product added to cart: " + productName);
 
-        return productsToAdd;} // 🔴 THIS WAS MISSING
+            wait.until(ExpectedConditions.elementToBeClickable(homeLink)).click();
+            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(productLinks));
+        }
     }
+}

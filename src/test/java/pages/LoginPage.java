@@ -2,6 +2,10 @@ package pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 public class LoginPage {
 
@@ -15,10 +19,19 @@ public class LoginPage {
     By password = By.id("loginpassword");
     By loginBtn = By.xpath("//button[text()='Log in']");
 
-    public void login(String user, String pass) throws InterruptedException {
-        Thread.sleep(2000);
-        driver.findElement(username).sendKeys(user);
+    public void login(String user, String pass) {
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(username))
+                .sendKeys(user);
+
         driver.findElement(password).sendKeys(pass);
         driver.findElement(loginBtn).click();
+
+        // wait until login modal disappears
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                By.id("logInModal")
+        ));
     }
 }
