@@ -1,5 +1,6 @@
 package base;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -10,23 +11,24 @@ public class BaseTest {
 
     protected WebDriver driver;
 
+    // 🔥 STATIC BLOCK — runs ONCE before any test
+    static {
+        WebDriverManager.chromedriver().setup();
+    }
+
     @BeforeMethod
     public void setup() {
 
         ChromeOptions options = new ChromeOptions();
+        options.addArguments("--remote-allow-origins=*");
 
-        // 🔑 Jenkins-safe options
-        options.addArguments("--headless=new");
-        options.addArguments("--disable-gpu");
+        // Jenkins-safe flags
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--window-size=1920,1080");
-
-        // 🔑 FORCE Chrome binary (THIS FIXES YOUR ERROR)
-        options.setBinary("C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--start-maximized");
 
         driver = new ChromeDriver(options);
-        driver.get("https://www.demoblaze.com");
     }
 
     @AfterMethod(alwaysRun = true)
