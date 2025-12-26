@@ -80,5 +80,9 @@ public class HomePage {
 
         return categoryNames[index];
     }
+    public boolean isHomePageLoaded() {
+        return driver.getTitle().contains("STORE");
+    }
+
 
 }
