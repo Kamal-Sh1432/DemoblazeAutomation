@@ -54,6 +54,23 @@ src/test/java
 - Designed to be **stable and CI/CD friendly**
 
 ---
+## 🧠 CI/CD Strategy & Stability Notes
+
+This project follows a **real-world CI testing approach**.
+
+- Full end-to-end UI tests are **intentionally not executed in CI**
+- The Demoblaze application is a public demo site with dynamic UI behavior
+- Running full UI E2E in CI can lead to flaky builds
+
+### ✅ CI Approach Used
+- Jenkins executes **lightweight smoke validation**
+- Smoke test verifies application availability and basic load
+- Full E2E purchase flow is executed **locally or manually**
+
+This separation ensures:
+- Stable CI builds
+- Faster feedback
+- Professional handling of flaky UI behavior
 
 ## ▶️ How to Run the Tests (STEP-BY-STEP)
 
@@ -73,3 +90,12 @@ Make sure the following are installed on your system:
 4. Run:
    ```bash
    mvn clean test
+
+## 🏁 Project Outcome
+
+- Clean Page Object Model architecture
+- Data-driven test execution
+- Jenkins-integrated CI flow
+- Practical handling of real-world UI instability
+
+This project reflects how UI automation is implemented in real enterprise environments.
