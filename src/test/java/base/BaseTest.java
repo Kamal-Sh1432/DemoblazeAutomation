@@ -1,48 +1,38 @@
 package base;
 
-import com.aventstack.extentreports.ExtentReports;
-import com.aventstack.extentreports.ExtentTest;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.annotations.*;
-
-import utils.ExtentManager;
-import java.util.Arrays;
-import java.lang.reflect.Method;
-import java.time.Duration;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 public class BaseTest {
 
     protected WebDriver driver;
-    protected static ExtentReports extent;
-    protected ExtentTest test;
-
-    @BeforeSuite
-    public void startReport() {
-        extent = ExtentManager.getExtentReport();
-    }
 
     @BeforeMethod
-    public void setup(Method method, Object[] testData) {
+    public void setup() {
 
-        // Create UNIQUE test name per iteration
-        String testName = method.getName() + " | DataSet: " + Arrays.toString(testData);
-        test = extent.createTest(testName);
+        ChromeOptions options = new ChromeOptions();
 
-        driver = new ChromeDriver();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        driver.manage().window().maximize();
+        // 🔑 Jenkins-safe options
+        options.addArguments("--headless=new");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--window-size=1920,1080");
+
+        // 🔑 FORCE Chrome binary (THIS FIXES YOUR ERROR)
+        options.setBinary("C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe");
+
+        driver = new ChromeDriver(options);
         driver.get("https://www.demoblaze.com");
     }
-    @AfterMethod
+
+    @AfterMethod(alwaysRun = true)
     public void tearDown() {
         if (driver != null) {
             driver.quit();
         }
-    }
-
-    @AfterSuite
-    public void endReport() {
-        extent.flush();
     }
 }

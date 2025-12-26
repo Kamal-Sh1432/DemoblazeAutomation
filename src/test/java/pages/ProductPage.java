@@ -3,7 +3,7 @@ package pages;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WebElement;   // ✅ THIS WAS MISSING
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -17,50 +17,66 @@ public class ProductPage {
     private final WebDriverWait wait;
     private final Random random = new Random();
 
-    // Demoblaze locators (nava is correct DOM id, not a typo)
     private final By productLinks = By.cssSelector(".card-title a");
     private final By addToCartBtn = By.linkText("Add to cart");
     private final By homeLink = By.id("nava");
 
     public ProductPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
     }
 
-    /**
-     * Adds 1 or 2 random products to cart in a stable way
-     */
-    public void addRandomProductsToCart() {
+    public int addRandomProductsToCart() {
 
-        int productsToAdd = random.nextInt(2) + 1;
-        System.out.println("🛒 Products to add in this iteration: " + productsToAdd);
+        int productsToAdd = random.nextInt(3) + 1;
+        System.out.println("🛒 Products to add: " + productsToAdd);
 
-        for (int i = 1; i <= productsToAdd; i++) {
+        for (int i = 0; i < productsToAdd; i++) {
 
-            // Always re-fetch fresh elements (prevents stale element issues)
-            List<WebElement> products = wait.until(
-                    ExpectedConditions.presenceOfAllElementsLocatedBy(productLinks)
-            );
+            boolean added = false;
+            int attempts = 0;
 
-            int index = random.nextInt(products.size());
-            WebElement selectedProduct = products.get(index);
-            String productName = selectedProduct.getText();
+            while (!added && attempts < 2) {
+                try {
+                    attempts++;
 
-            System.out.println("➡️ Selecting product: " + productName);
+                    // 🔑 Fetch product list ONCE
+                    List<WebElement> products = wait.until(
+                            ExpectedConditions.presenceOfAllElementsLocatedBy(productLinks)
+                    );
 
-            selectedProduct.click();
+                    if (products.size() == 0) {
+                        throw new RuntimeException("No products found on page");
+                    }
 
-            wait.until(ExpectedConditions.elementToBeClickable(addToCartBtn)).click();
+                    int index = random.nextInt(products.size());
+                    products.get(index).click();
 
-            try {
-                Alert alert = wait.until(ExpectedConditions.alertIsPresent());
-                alert.accept();
-            } catch (Exception ignored) {}
+                    // Wait for product page
+                    wait.until(ExpectedConditions.elementToBeClickable(addToCartBtn)).click();
 
-            System.out.println("✅ Product added to cart: " + productName);
+                    Alert alert = wait.until(ExpectedConditions.alertIsPresent());
+                    alert.accept();
 
-            wait.until(ExpectedConditions.elementToBeClickable(homeLink)).click();
-            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(productLinks));
+                    wait.until(ExpectedConditions.elementToBeClickable(homeLink)).click();
+                    wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(productLinks));
+
+                    added = true;
+                    System.out.println("✅ Product added successfully");
+
+                } catch (org.openqa.selenium.StaleElementReferenceException |
+                         IndexOutOfBoundsException e) {
+
+                    System.out.println("⚠️ DOM changed, retrying once...");
+                }
+            }
+
+            if (!added) {
+                throw new RuntimeException("❌ Failed to add product after retry");
+            }
         }
+
+        return productsToAdd;
     }
+
 }
